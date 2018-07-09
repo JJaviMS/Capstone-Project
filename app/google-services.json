@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "542870248837",
+    "firebase_url": "https://citypanel-fa523.firebaseio.com",
+    "project_id": "citypanel-fa523",
+    "storage_bucket": "citypanel-fa523.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:542870248837:android:ea8d9fdda3ad0773",
+        "android_client_info": {
+          "package_name": "com.example.evilj.citypanel"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "542870248837-knfuim4buugbugddann8hii5itkqbj60.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.evilj.citypanel",
+            "certificate_hash": "2596356b59aa94c0993cb98d8029e4bccc2f91ce"
+          }
+        },
+        {
+          "client_id": "542870248837-g50498lcvpsmph9fpv9r3e4uf7di3n2u.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "542870248837-g50498lcvpsmph9fpv9r3e4uf7di3n2u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7436YPnnP5acDuDRlOOd7msJDqQ0KxZ8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "542870248837-g50498lcvpsmph9fpv9r3e4uf7di3n2u.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
