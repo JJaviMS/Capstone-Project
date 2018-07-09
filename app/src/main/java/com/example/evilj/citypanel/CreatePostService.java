@@ -7,6 +7,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.example.evilj.citypanel.Models.Post;
@@ -19,6 +20,10 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -34,6 +39,7 @@ public class CreatePostService extends IntentService {
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
     private static final String ACTION_POST_NO_IMAGE = "com.example.evilj.citypanel.action.POST_NO_IMAGE";
     private static final String ACTION_POST_IMAGE = "com.example.evilj.citypanel.action.POST_IMAGE";
+    private static final String TAG = CreatePostService.class.getSimpleName();
 
     // TODO: Rename parameters
     private static final String EXTRA_IMAGE = "com.example.evilj.citypanel.extra.IMAGE";
@@ -72,7 +78,7 @@ public class CreatePostService extends IntentService {
      * @see IntentService
      */
     // TODO: Customize helper method
-    public static void startActionImage(Context context, String post, String user,String userImage, String city, String userUid, byte[] image ) {
+    public static void startActionImage(Context context, String post, String user,String userImage, String city, String userUid, String path ) {
         Intent intent = new Intent(context, CreatePostService.class);
         intent.setAction(ACTION_POST_NO_IMAGE);
         intent.putExtra(EXTRA_POST, post);
@@ -80,7 +86,7 @@ public class CreatePostService extends IntentService {
         intent.putExtra(EXTRA_USER_IMAGE,userImage);
         intent.putExtra(EXTRA_CITY,city);
         intent.putExtra(EXTRA_USER_UID,userUid);
-        intent.putExtra(EXTRA_IMAGE,image);
+        intent.putExtra(EXTRA_IMAGE,path);
         context.startService(intent);
     }
 
@@ -94,7 +100,7 @@ public class CreatePostService extends IntentService {
                 final String extraUserImg = intent.getStringExtra(EXTRA_USER_IMAGE);
                 final String extraCity = intent.getStringExtra(EXTRA_CITY);
                 final String extraUserUid = intent.getStringExtra(EXTRA_USER_UID);
-                final byte [] image = intent.getByteArrayExtra(EXTRA_IMAGE);
+                final String image = intent.getStringExtra(EXTRA_IMAGE);
                 Post post = new Post(extraPost,null,extraUserUid,extraCity,extraUser,extraUserImg);
                 handleActionImage(post,image);
             } else if (ACTION_POST_NO_IMAGE.equals(action)) {
@@ -123,13 +129,22 @@ public class CreatePostService extends IntentService {
      * Handle action Baz in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionImage(final Post post, byte[] image) {
+    private void handleActionImage(final Post post, String image) {
         StorageReference rootRef = FirebaseStorage.getInstance().getReference();
+        InputStream stream;
+        try {
+            stream = new FileInputStream(new File(image));
+        } catch (FileNotFoundException e) {
+            stream =null;
+            Log.d(TAG,"Error loading the image");
+            e.printStackTrace();
+            return;
+        }
         @SuppressLint("SimpleDateFormat")
         String time = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String filename = post.getCreadorUID() + time;
         final StorageReference imagePostRef = rootRef.child("images/"+post.getCity()+"/"+filename);
-        UploadTask uploadTask = imagePostRef.putBytes(image);
+        UploadTask uploadTask = imagePostRef.putStream(stream);
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {

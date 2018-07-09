@@ -30,13 +30,10 @@ import com.google.android.gms.common.util.IOUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -66,20 +63,19 @@ public class CreatePostActivity extends AppCompatActivity {
     @BindView(R.id.camera_image_view)
     ImageView mCameraImageView;
 
-    private byte [] mImage;
     private String mCurrentPath;
     private String city;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (FirebaseAuth.getInstance().getCurrentUser()==null) goToLogin();
+        if (FirebaseAuth.getInstance().getCurrentUser() == null) goToLogin();
         setContentView(R.layout.activity_create_post);
         ButterKnife.bind(this);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) actionBar.setDisplayHomeAsUpEnabled(true);
         Intent intent = getIntent();
-        if (intent==null) throw new IllegalStateException();
+        if (intent == null) throw new IllegalStateException();
         city = intent.getStringExtra(EXTRA_CITY);
     }
 
@@ -87,18 +83,17 @@ public class CreatePostActivity extends AppCompatActivity {
     void publishPost() {
         String post = mPostEdit.getEditableText().toString().trim();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user==null) throw new IllegalStateException();
+        if (user == null) throw new IllegalStateException();
         String userName = user.getDisplayName();
         String userImg = Objects.requireNonNull(user.getPhotoUrl()).toString();
         String userUid = user.getUid();
-
-
-        Intent intent;
-        if (mImage!=null){
-            CreatePostService.startActionImage(this,post,userName,userImg,city,userUid,mImage);
-        }else{
-            CreatePostService.startActionPostNoImage(this,post,userName,userImg,city,userUid);
+        if (mCurrentPath != null) {
+            CreatePostService.startActionImage(this, post, userName, userImg, city, userUid, mCurrentPath);
+        } else {
+            CreatePostService.startActionPostNoImage(this, post, userName, userImg, city, userUid);
         }
+        finish();
+
 
     }
 
@@ -108,15 +103,15 @@ public class CreatePostActivity extends AppCompatActivity {
     @OnClick(R.id.add_image_iv)
     void addImage() {
         if (checkReadStoragePermission()) {
-            if (mImage == null) {
+            if (mCurrentPath == null) {
                 Intent gallery = new Intent(Intent.ACTION_PICK);
                 gallery.setType("image/*");
                 startActivityForResult(gallery, GALLERY_INTENT_ID);
             } else {
-                mImage = null;
+                mCurrentPath = null;
                 changePickedImageState();
             }
-        }else{
+        } else {
             requestReadPermissions();
             //The method should be called again
         }
@@ -128,45 +123,22 @@ public class CreatePostActivity extends AppCompatActivity {
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case GALLERY_INTENT_ID: {
-                    try {
-                        Uri uri = data.getData();
-                        if (uri == null) return;
-                        InputStream stream = getContentResolver().openInputStream(uri);
-                        if (stream != null) {
-                            mImage = IOUtils.toByteArray(stream);
-                        }else{
-                            mImage =null;
-                        }
+                    Uri uri = data.getData();
+                    if (uri != null) {
+                        mCurrentPath = uri.getPath();
                         changePickedImageState();
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                        mImage = null;
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                }
-                case CAMERA_INTENT_ID:{
-                    if (mCurrentPath != null) {
-                        try {
-                            FileInputStream fileInputStream = new FileInputStream(mCurrentPath);
-                            mImage = IOUtils.toByteArray(fileInputStream);
-                            changePickedImageState();
-                            addToGallery();
-                        } catch (IOException e) {
-                            mImage=null;
-                            changePickedImageState();
-                            e.printStackTrace();
-                        }
                     }else{
-                        mImage = null;
+                        mCurrentPath = null;
                         changePickedImageState();
                     }
 
                 }
+                case CAMERA_INTENT_ID: {
+                    changePickedImageState();
+                }
             }
-        }else{
-            switch (requestCode){
+        } else {
+            switch (requestCode) {
                 case LOG_IN_REQ:
                     Toast.makeText(this, R.string.must_be_logged, Toast.LENGTH_SHORT).show();
                     finish();
@@ -178,7 +150,7 @@ public class CreatePostActivity extends AppCompatActivity {
      * This method will change the buttons depending on the state of the imageBitmap
      */
     private void changePickedImageState() {
-        if (mImage != null) {
+        if (mCurrentPath != null) {
             mCameraImageView.setVisibility(View.GONE);
             mAddImageIv.setImageResource(R.drawable.ic_cancel_black_24dp);
         } else {
@@ -194,12 +166,12 @@ public class CreatePostActivity extends AppCompatActivity {
     void cameraImage() {
         boolean cameraPermission = checkCameraPermission();
         boolean storage = checkWritteStoragePermission();
-        if (!(cameraPermission&&storage)){
-            cameraPermissionsRequest(cameraPermission,storage);
+        if (!(cameraPermission && storage)) {
+            cameraPermissionsRequest(cameraPermission, storage);
             return;//The method should be called again
         }
         Intent camera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (camera.resolveActivity(getPackageManager()) != null){
+        if (camera.resolveActivity(getPackageManager()) != null) {
             File file;
             try {
                 file = createFile();
@@ -207,40 +179,43 @@ public class CreatePostActivity extends AppCompatActivity {
                 file = null;
                 e.printStackTrace();
             }
-            if (file==null){
-                Log.e(TAG,"Problem getting file");
+            if (file == null) {
+                Log.e(TAG, "Problem getting file");
                 Toast.makeText(this, R.string.error, Toast.LENGTH_SHORT).show();
                 return;
             }
-            Uri photoUri = FileProvider.getUriForFile(this,this.getPackageName(),file);
-            camera.putExtra(MediaStore.EXTRA_OUTPUT,photoUri);
+            Uri photoUri = FileProvider.getUriForFile(this, this.getPackageName(), file);
+            camera.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
             startActivityForResult(camera, CAMERA_INTENT_ID);
         }
     }
 
     /**
      * Check the reading the storage permissions
+     *
      * @return True if the permissions are granted
      */
-    private boolean checkReadStoragePermission(){
+    private boolean checkReadStoragePermission() {
         int permissionState = ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE);
         return permissionState == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
      * Check the written storage permissions
+     *
      * @return True if the permissions are granted
      */
-    private boolean checkWritteStoragePermission(){
+    private boolean checkWritteStoragePermission() {
         int permissionState = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
         return permissionState == PackageManager.PERMISSION_GRANTED;
     }
 
     /**
      * Check for camera permissions
+     *
      * @return True if the permissions are granted
      */
-    private boolean checkCameraPermission (){
+    private boolean checkCameraPermission() {
         int permissionState = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA);
         return permissionState == PackageManager.PERMISSION_GRANTED;
     }
@@ -248,44 +223,46 @@ public class CreatePostActivity extends AppCompatActivity {
     /**
      * Request the reading storage permissions
      */
-    private void requestReadPermissions(){
-        ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},EXTERNAL_STORAGE_READ_REQUEST);
+    private void requestReadPermissions() {
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, EXTERNAL_STORAGE_READ_REQUEST);
     }
 
     /**
      * Request camera and writting storage permissions if needed
-     * @param camera If the app have camera permissions
+     *
+     * @param camera  If the app have camera permissions
      * @param storage If the app have written storage
      */
-    private void cameraPermissionsRequest (boolean camera, boolean storage){
-        String [] permissions = new String[!camera&&!storage?2:1];
+    private void cameraPermissionsRequest(boolean camera, boolean storage) {
+        String[] permissions = new String[!camera && !storage ? 2 : 1];
         int code;
-        if (!camera&&!storage){
-            permissions [0] = Manifest.permission.CAMERA;
-            permissions [1] = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+        if (!camera && !storage) {
+            permissions[0] = Manifest.permission.CAMERA;
+            permissions[1] = Manifest.permission.WRITE_EXTERNAL_STORAGE;
             code = CAMERA_WRITTE_STORAGE_REQUEST;
-        }else if (!camera){
-            permissions [0] = Manifest.permission.CAMERA;
+        } else if (!camera) {
+            permissions[0] = Manifest.permission.CAMERA;
             code = CAMERA_REQUEST;
-        }else{
-            permissions [0] = Manifest.permission.WRITE_EXTERNAL_STORAGE;
+        } else {
+            permissions[0] = Manifest.permission.WRITE_EXTERNAL_STORAGE;
             code = EXTERNAL_STORAGE_WRITTE_REQUEST;
         }
-        ActivityCompat.requestPermissions(this,permissions,code);
+        ActivityCompat.requestPermissions(this, permissions, code);
     }
 
     /**
      * Creates the reference to save an image
+     *
      * @return Reference of the storage
      * @throws IOException Error creating the reference
      */
     @NonNull
-    private File createFile () throws IOException {
+    private File createFile() throws IOException {
         @SuppressLint("SimpleDateFormat")
         String time = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageName = "JPEG_" + time + "_";
         File storageInf = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        File file = File.createTempFile(imageName,".jpg",storageInf);
+        File file = File.createTempFile(imageName, ".jpg", storageInf);
         mCurrentPath = file.getAbsolutePath();
         return file;
     }
@@ -293,9 +270,9 @@ public class CreatePostActivity extends AppCompatActivity {
     /**
      * Show the image in the gallery
      */
-    private void addToGallery (){
-        if (mCurrentPath==null){
-            Log.d(TAG,"Path is null, can´t send image to gallery");
+    private void addToGallery() {
+        if (mCurrentPath == null) {
+            Log.d(TAG, "Path is null, can´t send image to gallery");
             return;
         }
         Intent mediaScan = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
@@ -306,22 +283,22 @@ public class CreatePostActivity extends AppCompatActivity {
     }
 
     @Nullable
-    private Bitmap getBitmapFromPath (){
+    private Bitmap getBitmapFromPath() {
         File file = new File(mCurrentPath);
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         try {
-            return BitmapFactory.decodeStream(new FileInputStream(file),null,options);
+            return BitmapFactory.decodeStream(new FileInputStream(file), null, options);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    private void goToLogin(){
+    private void goToLogin() {
         List<AuthUI.IdpConfig> providers = Arrays.asList(new AuthUI.IdpConfig.EmailBuilder().build(),
                 new AuthUI.IdpConfig.PhoneBuilder().build(),
                 new AuthUI.IdpConfig.GoogleBuilder().build());
-        startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers).build(),LOG_IN_REQ);
+        startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers).build(), LOG_IN_REQ);
     }
 }
