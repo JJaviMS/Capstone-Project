@@ -26,7 +26,6 @@ import android.widget.Toast;
 import com.example.evilj.citypanel.CreatePostService;
 import com.example.evilj.citypanel.R;
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.common.util.IOUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -53,6 +52,7 @@ public class CreatePostActivity extends AppCompatActivity {
     private final static int CAMERA_WRITTE_STORAGE_REQUEST = 5;
     private final static String TAG = CreatePostActivity.class.getSimpleName();
     private final static int LOG_IN_REQ = 6;
+    private final static String KEY_PATH = "path";
 
     public final static String EXTRA_CITY = "city";
 
@@ -63,7 +63,7 @@ public class CreatePostActivity extends AppCompatActivity {
     @BindView(R.id.camera_image_view)
     ImageView mCameraImageView;
 
-    private String mCurrentPath;
+    private String mCurrentUri;
     private String city;
 
     @Override
@@ -87,8 +87,8 @@ public class CreatePostActivity extends AppCompatActivity {
         String userName = user.getDisplayName();
         String userImg = Objects.requireNonNull(user.getPhotoUrl()).toString();
         String userUid = user.getUid();
-        if (mCurrentPath != null) {
-            CreatePostService.startActionImage(this, post, userName, userImg, city, userUid, mCurrentPath);
+        if (mCurrentUri != null) {
+            CreatePostService.startActionImage(this, post, userName, userImg, city, userUid, mCurrentUri);
         } else {
             CreatePostService.startActionPostNoImage(this, post, userName, userImg, city, userUid);
         }
@@ -103,12 +103,12 @@ public class CreatePostActivity extends AppCompatActivity {
     @OnClick(R.id.add_image_iv)
     void addImage() {
         if (checkReadStoragePermission()) {
-            if (mCurrentPath == null) {
+            if (mCurrentUri == null) {
                 Intent gallery = new Intent(Intent.ACTION_PICK);
                 gallery.setType("image/*");
                 startActivityForResult(gallery, GALLERY_INTENT_ID);
             } else {
-                mCurrentPath = null;
+                mCurrentUri = null;
                 changePickedImageState();
             }
         } else {
@@ -125,10 +125,10 @@ public class CreatePostActivity extends AppCompatActivity {
                 case GALLERY_INTENT_ID: {
                     Uri uri = data.getData();
                     if (uri != null) {
-                        mCurrentPath = uri.getPath();
+                        mCurrentUri = uri.toString();
                         changePickedImageState();
                     }else{
-                        mCurrentPath = null;
+                        mCurrentUri = null;
                         changePickedImageState();
                     }
 
@@ -150,7 +150,7 @@ public class CreatePostActivity extends AppCompatActivity {
      * This method will change the buttons depending on the state of the imageBitmap
      */
     private void changePickedImageState() {
-        if (mCurrentPath != null) {
+        if (mCurrentUri != null) {
             mCameraImageView.setVisibility(View.GONE);
             mAddImageIv.setImageResource(R.drawable.ic_cancel_black_24dp);
         } else {
@@ -185,6 +185,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 return;
             }
             Uri photoUri = FileProvider.getUriForFile(this, this.getPackageName(), file);
+            mCurrentUri = photoUri.toString();
             camera.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
             startActivityForResult(camera, CAMERA_INTENT_ID);
         }
@@ -263,7 +264,7 @@ public class CreatePostActivity extends AppCompatActivity {
         String imageName = "JPEG_" + time + "_";
         File storageInf = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File file = File.createTempFile(imageName, ".jpg", storageInf);
-        mCurrentPath = file.getAbsolutePath();
+        mCurrentUri = file.getAbsolutePath();
         return file;
     }
 
@@ -271,12 +272,12 @@ public class CreatePostActivity extends AppCompatActivity {
      * Show the image in the gallery
      */
     private void addToGallery() {
-        if (mCurrentPath == null) {
+        if (mCurrentUri == null) {
             Log.d(TAG, "Path is null, can´t send image to gallery");
             return;
         }
         Intent mediaScan = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File file = new File(mCurrentPath);
+        File file = new File(mCurrentUri);
         Uri uri = Uri.fromFile(file);
         mediaScan.setData(uri);
         this.sendBroadcast(mediaScan);
@@ -284,7 +285,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
     @Nullable
     private Bitmap getBitmapFromPath() {
-        File file = new File(mCurrentPath);
+        File file = new File(mCurrentUri);
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
         try {
@@ -300,5 +301,17 @@ public class CreatePostActivity extends AppCompatActivity {
                 new AuthUI.IdpConfig.PhoneBuilder().build(),
                 new AuthUI.IdpConfig.GoogleBuilder().build());
         startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder().setAvailableProviders(providers).build(), LOG_IN_REQ);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(KEY_PATH, mCurrentUri);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mCurrentUri = savedInstanceState.getString(KEY_PATH);
     }
 }

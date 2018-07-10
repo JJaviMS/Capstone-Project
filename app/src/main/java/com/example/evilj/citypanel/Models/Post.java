@@ -14,8 +14,15 @@ public class Post {
     private String city;
     private String creadorName;
     private String creadorImageURL;
+    private String id;
 
+    public String getId() {
+        return id;
+    }
 
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getMessage() {
         return message;
@@ -29,6 +36,26 @@ public class Post {
         return imageURL;
     }
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public void setCreadorUID(String creadorUID) {
+        this.creadorUID = creadorUID;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public void setCreadorName(String creadorName) {
+        this.creadorName = creadorName;
+    }
+
+    public void setCreadorImageURL(String creadorImageURL) {
+        this.creadorImageURL = creadorImageURL;
+    }
+
     public Post(String message, @Nullable String imageURL, String creadorUID, String city, String creadorName, String creadorImageURL) {
         this.message = message;
         this.imageURL = imageURL;
@@ -36,6 +63,7 @@ public class Post {
         this.city = city;
         this.creadorName = creadorName;
         this.creadorImageURL = creadorImageURL;
+
     }
 
     public String getCity() {

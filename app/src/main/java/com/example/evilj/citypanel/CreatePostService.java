@@ -6,13 +6,16 @@ import android.content.Intent;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.example.evilj.citypanel.Models.Post;
+import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -80,7 +83,7 @@ public class CreatePostService extends IntentService {
     // TODO: Customize helper method
     public static void startActionImage(Context context, String post, String user,String userImage, String city, String userUid, String path ) {
         Intent intent = new Intent(context, CreatePostService.class);
-        intent.setAction(ACTION_POST_NO_IMAGE);
+        intent.setAction(ACTION_POST_IMAGE);
         intent.putExtra(EXTRA_POST, post);
         intent.putExtra(EXTRA_USER, user);
         intent.putExtra(EXTRA_USER_IMAGE,userImage);
@@ -130,36 +133,37 @@ public class CreatePostService extends IntentService {
      * parameters.
      */
     private void handleActionImage(final Post post, String image) {
-        StorageReference rootRef = FirebaseStorage.getInstance().getReference();
-        InputStream stream;
-        try {
-            stream = new FileInputStream(new File(image));
-        } catch (FileNotFoundException e) {
-            stream =null;
-            Log.d(TAG,"Error loading the image");
-            e.printStackTrace();
-            return;
-        }
+        final StorageReference rootRef = FirebaseStorage.getInstance().getReference();
         @SuppressLint("SimpleDateFormat")
         String time = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String filename = post.getCreadorUID() + time;
         final StorageReference imagePostRef = rootRef.child("images/"+post.getCity()+"/"+filename);
-        UploadTask uploadTask = imagePostRef.putStream(stream);
+        UploadTask uploadTask = imagePostRef.putFile(Uri.parse(image));
         uploadTask.addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Toast.makeText(CreatePostService.this, R.string.error_create_post, Toast.LENGTH_SHORT).show();
             }
-        }).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+        });
+        Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
             @Override
-            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
                 if (task.isSuccessful()){
-                    post.setImageURL(imagePostRef.getDownloadUrl().toString());
-                    DatabaseReference rootDatabaseRef = FirebaseDatabase.getInstance().getReference();
-                    DatabaseReference postRef = rootDatabaseRef.child("post").child(post.getCity()).push();
-                    postRef.setValue(post);
+                    return imagePostRef.getDownloadUrl();
+                }else{
+                    return null;
                 }
             }
+        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+            @Override
+            public void onComplete(@NonNull Task<Uri> task) {
+                String imageDownload = task.getResult().toString();
+                DatabaseReference reference = FirebaseDatabase.getInstance().getReference().child("post").child(post.getCity()).push();
+                post.setImageURL(imageDownload);
+                reference.setValue(post);
+            }
         });
+
+
     }
 }

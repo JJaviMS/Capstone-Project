@@ -15,6 +15,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -37,7 +39,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements PostFirebaseRecyclerAdapter.RecyclerInterface {
     @BindView(R.id.recycler_post)
     RecyclerView mPostRecyclerView;
     @BindView(R.id.empty_linear_layout)
@@ -50,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private String mCurrentCity;
     private DatabaseReference mRootRef;
     private PostFirebaseRecyclerAdapter mAdapter;
+    private LinearLayoutManager mLinearLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,28 +129,34 @@ public class MainActivity extends AppCompatActivity {
      * Creates the adapter and set it to the RecyclerView
      */
     private void populateRecyclerView() {
-        SnapshotParser<Post> parser = new SnapshotParser<Post>() {
+      SnapshotParser<Post> parser = new SnapshotParser<Post>() {
             @NonNull
             @Override
             public Post parseSnapshot(@NonNull DataSnapshot snapshot) {
                 Post post = snapshot.getValue(Post.class);
                 if (post == null) throw new RuntimeException("Post cant be null");
+                post.setId(snapshot.getKey());
+
+
                 return post;
             }
         };
-        DatabaseReference reference = mRootRef.child("Post").child(mCurrentCity);
+        DatabaseReference reference = mRootRef.child("post").child(mCurrentCity);
         FirebaseRecyclerOptions<Post> recyclerOptions =
                 new FirebaseRecyclerOptions.Builder<Post>().setQuery(reference, parser).build();
-        mAdapter = new PostFirebaseRecyclerAdapter(recyclerOptions, this);
-        if (mAdapter.getItemCount() == 0) {
-            mAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-                @Override
-                public void onItemRangeInserted(int positionStart, int itemCount) {
-                    super.onItemRangeInserted(positionStart, itemCount);
-                    showEmptyView();
-                }
-            });
-        }
+        mAdapter = new PostFirebaseRecyclerAdapter(recyclerOptions, this,this);
+        mPostRecyclerView.setAdapter(mAdapter);
+        mLinearLayoutManager = new LinearLayoutManager(this);
+        mPostRecyclerView.setLayoutManager(mLinearLayoutManager);
+        mAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                showEmptyView();
+            }
+        });
+        mPostRecyclerView.addItemDecoration(new DividerItemDecoration(this,mLinearLayoutManager.getOrientation()));
+        mAdapter.startListening();
     }
 
     private void showEmptyView() {
@@ -177,5 +186,10 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this,CreatePostActivity.class);
         intent.putExtra(CreatePostActivity.EXTRA_CITY,mCurrentCity);
         startActivity(intent);
+    }
+
+    @Override
+    public void dataChanged() {
+        showEmptyView();
     }
 }

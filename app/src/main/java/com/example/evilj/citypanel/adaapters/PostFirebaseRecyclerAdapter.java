@@ -34,19 +34,24 @@ public class PostFirebaseRecyclerAdapter extends FirebaseRecyclerAdapter<Post, P
     public PostFirebaseRecyclerAdapter(@NonNull FirebaseRecyclerOptions<Post> options) {
         super(options);
     }
+    public interface RecyclerInterface{
+        void dataChanged ();
+    }
 
     private Context mContext;
+    private RecyclerInterface mRecyclerInterface;
 
-    public PostFirebaseRecyclerAdapter(@NonNull FirebaseRecyclerOptions<Post> options, Context context) {
+    public PostFirebaseRecyclerAdapter(@NonNull FirebaseRecyclerOptions<Post> options, Context context,RecyclerInterface recyclerInterface) {
         super(options);
         mContext = context;
+        mRecyclerInterface = recyclerInterface;
     }
 
     @Override
     protected void onBindViewHolder(@NonNull PostViewHolder holder, int position, @NonNull Post model) {
         if (model.getImageURL() == null) holder.mPostIv.setVisibility(View.GONE);
         else {
-            holder.mPostMessage.setVisibility(View.VISIBLE);
+            holder.mPostIv.setVisibility(View.VISIBLE);
             Glide.with(mContext).load(model.getImageURL()).apply(RequestOptions.centerCropTransform())
                     .into(holder.mPostIv);
         }
@@ -77,5 +82,11 @@ public class PostFirebaseRecyclerAdapter extends FirebaseRecyclerAdapter<Post, P
             ButterKnife.bind(this, itemView);
         }
 
+    }
+
+    @Override
+    public void onDataChanged() {
+        super.onDataChanged();
+        mRecyclerInterface.dataChanged();
     }
 }
