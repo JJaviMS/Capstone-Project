@@ -18,6 +18,7 @@ import com.firebase.ui.database.FirebaseRecyclerOptions;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Created by JjaviMS on 19/06/2018.
@@ -36,6 +37,7 @@ public class PostFirebaseRecyclerAdapter extends FirebaseRecyclerAdapter<Post, P
     }
     public interface RecyclerInterface{
         void dataChanged ();
+        void onClick (String key);
     }
 
     private Context mContext;
@@ -80,6 +82,12 @@ public class PostFirebaseRecyclerAdapter extends FirebaseRecyclerAdapter<Post, P
         PostViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
+        }
+
+        @OnClick(R.id.view_holder)
+        void onClick (){
+            Post post = getItem(getAdapterPosition());
+            mRecyclerInterface.onClick(post.getId());
         }
 
     }

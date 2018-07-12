@@ -192,4 +192,10 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
     public void dataChanged() {
         showEmptyView();
     }
+
+    @Override
+    public void onClick(String key) {
+        Intent intent; //TODO Change image
+        
+    }
 }

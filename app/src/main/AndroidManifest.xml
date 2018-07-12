@@ -37,7 +37,9 @@
 
         <service
             android:name=".CreatePostService"
-            android:exported="false"></service>
+            android:exported="false" />
+
+        <activity android:name=".Activities.DetailActivity"></activity>
     </application>
 
 </manifest>
