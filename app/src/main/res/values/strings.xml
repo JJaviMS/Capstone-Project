@@ -5,11 +5,12 @@
     <string name="OK">OK</string>
     <string name="no">No</string>
     <string name="post_created_by">Post created by:</string>
-    <string name="profile_picture_of_the_post_autor">Profile picture of the post autor</string>
+    <string name="profile_picture_of_the_post_autor">Profile picture of the post author</string>
     <string name="post_image_descriptor">The post imgage</string>
     <string name="post_message">Post message</string>
-    <string name="post">POST!</string>
+    <string name="post_exclamation">POST!</string>
     <string name="error">Error</string>
     <string name="error_create_post">Error creating post</string>
     <string name="must_be_logged">You must be logged in</string>
+    <string name="post">Post</string>
 </resources>
