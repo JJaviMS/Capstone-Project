@@ -198,6 +198,12 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        invalidateOptionsMenu();
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         if (mAdapter != null) mAdapter.stopListening();
