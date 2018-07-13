@@ -13,8 +13,7 @@
         android:background="#09C"
         android:textColor="#ffffff"
         android:textSize="20sp"
-        android:textStyle="bold|italic"
-        android:text="aaaaaa"/>
+        android:textStyle="bold|italic" />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -22,7 +21,6 @@
         android:layout_margin="4dp"
         android:background="#09c"
         android:textColor="#ffffff"
-        android:textSize="24sp"
-        android:text="aaaaaaaa"/>
+        android:textSize="24sp" />
 
 </LinearLayout>

@@ -16,7 +16,9 @@ import android.support.v4.content.ContextCompat;
 import com.example.evilj.citypanel.Models.Post;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.io.IOException;
@@ -35,6 +37,7 @@ public class WidgetPostService extends IntentService {
 
     public static void startActionPost(Context context) {
         Intent intent = new Intent(context, WidgetPostService.class);
+        intent.setAction(ACTION_POST);
         context.startService(intent);
     }
 
@@ -54,18 +57,25 @@ public class WidgetPostService extends IntentService {
             PostWidget.sPost = null;
             return;
         }
-        FirebaseDatabase.getInstance().getReference().child("post")
-                .child(city).limitToLast(1).addListenerForSingleValueEvent(new ValueEventListener() {
+        Query ref = FirebaseDatabase.getInstance().getReference().child("post")
+                .child(city).limitToLast(1);
+        ValueEventListener listener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                PostWidget.sPost = dataSnapshot.getValue(Post.class);
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+                    PostWidget.sPost = snapshot.getValue(Post.class);
+                }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 PostWidget.sPost = null;
             }
-        });
+        };
+        ref.addListenerForSingleValueEvent(listener);//Get value
+        ref.removeEventListener(listener);//Remove listener
+
+
 
     }
 
@@ -77,6 +87,8 @@ public class WidgetPostService extends IntentService {
             LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             Location location;
             if (locationManager != null) {
+                if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                        ||!locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) return null;
                 location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
             } else return null;
             double longitude = location.getLongitude();
