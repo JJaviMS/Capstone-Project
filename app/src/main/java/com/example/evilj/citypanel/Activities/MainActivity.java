@@ -96,6 +96,8 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
                     }).show();
                 } else {
                     mCurrentCity = getCurrentCity();
+                    populateRecyclerView();
+
                 }
             }
         }
