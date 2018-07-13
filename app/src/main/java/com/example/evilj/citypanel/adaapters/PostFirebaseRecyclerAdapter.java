@@ -37,7 +37,7 @@ public class PostFirebaseRecyclerAdapter extends FirebaseRecyclerAdapter<Post, P
     }
     public interface RecyclerInterface{
         void dataChanged ();
-        void onClick (String key);
+        void onClick (Post post);
     }
 
     private Context mContext;
@@ -87,7 +87,7 @@ public class PostFirebaseRecyclerAdapter extends FirebaseRecyclerAdapter<Post, P
         @OnClick(R.id.view_holder)
         void onClick (){
             Post post = getItem(getAdapterPosition());
-            mRecyclerInterface.onClick(post.getId());
+            mRecyclerInterface.onClick(post);
         }
 
     }

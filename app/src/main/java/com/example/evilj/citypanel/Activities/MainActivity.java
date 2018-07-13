@@ -194,8 +194,9 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
     }
 
     @Override
-    public void onClick(String key) {
-        Intent intent; //TODO Change image
-        
+    public void onClick(Post post) {
+        Intent intent = new Intent(this,DetailActivity.class);
+        intent.putExtra(DetailActivity.POST_EXTRA,post);
+        startActivity(intent);
     }
 }

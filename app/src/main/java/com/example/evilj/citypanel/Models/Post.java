@@ -1,5 +1,7 @@
 package com.example.evilj.citypanel.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
 /**
@@ -7,7 +9,7 @@ import android.support.annotation.Nullable;
  *
  * @author JJaviMS
  */
-public class Post {
+public class Post implements Parcelable {
     private String message;
     @Nullable private String imageURL;
     private String creadorUID;
@@ -15,6 +17,28 @@ public class Post {
     private String creadorName;
     private String creadorImageURL;
     private String id;
+
+    private Post(Parcel in) {
+        message = in.readString();
+        imageURL = in.readString();
+        creadorUID = in.readString();
+        city = in.readString();
+        creadorName = in.readString();
+        creadorImageURL = in.readString();
+        id = in.readString();
+    }
+
+    public static final Creator<Post> CREATOR = new Creator<Post>() {
+        @Override
+        public Post createFromParcel(Parcel in) {
+            return new Post(in);
+        }
+
+        @Override
+        public Post[] newArray(int size) {
+            return new Post[size];
+        }
+    };
 
     public String getId() {
         return id;
@@ -84,5 +108,21 @@ public class Post {
 
     public void setImageURL(@Nullable String imageURL) {
         this.imageURL = imageURL;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(message);
+        parcel.writeString(imageURL);
+        parcel.writeString(creadorUID);
+        parcel.writeString(city);
+        parcel.writeString(creadorName);
+        parcel.writeString(creadorImageURL);
+        parcel.writeString(id);
     }
 }
