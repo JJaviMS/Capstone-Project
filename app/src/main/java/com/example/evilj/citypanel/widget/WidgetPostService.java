@@ -2,6 +2,8 @@ package com.example.evilj.citypanel.widget;
 
 import android.Manifest;
 import android.app.IntentService;
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -62,9 +64,13 @@ public class WidgetPostService extends IntentService {
         ValueEventListener listener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Post post=null;
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()){
-                    PostWidget.sPost = snapshot.getValue(Post.class);
+                    post = snapshot.getValue(Post.class);
                 }
+                AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(WidgetPostService.this);
+                int[] appWidgId = appWidgetManager.getAppWidgetIds(new ComponentName(WidgetPostService.this,PostWidget.class));
+                PostWidget.updateWidget(post,appWidgetManager,appWidgId,WidgetPostService.this);
             }
 
             @Override

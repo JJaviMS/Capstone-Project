@@ -20,13 +20,13 @@ public class PostWidget extends AppWidgetProvider {
 
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.post_widget);
-        if (sPost==null){
-            views.setTextViewText(R.id.widget_post,context.getString(R.string.no_post));
+        if (sPost == null) {
+            views.setTextViewText(R.id.widget_post, context.getString(R.string.no_post));
             views.setViewVisibility(R.id.widget_name, View.GONE);
-        }else{
-            views.setTextViewText(R.id.widget_post,sPost.getMessage());
-            views.setViewVisibility(R.id.widget_name,View.VISIBLE);
-            views.setTextViewText(R.id.widget_name,sPost.getCreadorName());
+        } else {
+            views.setTextViewText(R.id.widget_post, sPost.getMessage());
+            views.setViewVisibility(R.id.widget_name, View.VISIBLE);
+            views.setTextViewText(R.id.widget_name, sPost.getCreadorName());
         }
 
         // Instruct the widget manager to update the widget
@@ -37,9 +37,6 @@ public class PostWidget extends AppWidgetProvider {
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
         WidgetPostService.startActionPost(context);
-        for (int appWidgetId : appWidgetIds) {
-            updateAppWidget(context, appWidgetManager, appWidgetId);
-        }
     }
 
     @Override
@@ -50,6 +47,13 @@ public class PostWidget extends AppWidgetProvider {
     @Override
     public void onDisabled(Context context) {
         // Enter relevant functionality for when the last widget is disabled
+    }
+
+    public static void updateWidget(Post post, AppWidgetManager appWidgetManager, int[] appWidgetsId, Context context) {
+        sPost = post;
+        for (int appWidgetId : appWidgetsId) {
+            updateAppWidget(context, appWidgetManager, appWidgetId);
+        }
     }
 }
 
