@@ -18,6 +18,8 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -313,5 +315,26 @@ public class CreatePostActivity extends AppCompatActivity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         mCurrentUri = savedInstanceState.getString(KEY_PATH);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if (FirebaseAuth.getInstance().getCurrentUser()!=null){
+            getMenuInflater().inflate(R.menu.sign_out,menu);
+            return true;
+        }else {
+            return super.onCreateOptionsMenu(menu);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.sign_out_button:{
+                FirebaseAuth.getInstance().signOut();
+                invalidateOptionsMenu();
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
