@@ -23,7 +23,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.example.evilj.citypanel.CreatePostService;
+import com.example.evilj.citypanel.services.CreatePostService;
 import com.example.evilj.citypanel.R;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;

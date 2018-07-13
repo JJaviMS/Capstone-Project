@@ -36,10 +36,24 @@
         </provider>
 
         <service
-            android:name=".CreatePostService"
+            android:name=".services.CreatePostService"
             android:exported="false" />
 
-        <activity android:name=".Activities.DetailActivity"></activity>
+        <activity android:name=".Activities.DetailActivity" />
+
+        <receiver android:name=".widget.PostWidget">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/post_widget_info" />
+        </receiver>
+
+        <service
+            android:name=".widget.WidgetPostService"
+            android:exported="false"></service>
     </application>
 
 </manifest>
