@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
     LinearLayout mEmptyLayout;
 
     private static final int LOCATION_REQUEST = 0;
+    private static final String RECYCLER_POS = "pos";
 
     private Location mLocation;
     private LocationManager mLocationManager;
@@ -198,5 +199,17 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
         Intent intent = new Intent(this,DetailActivity.class);
         intent.putExtra(DetailActivity.POST_EXTRA,post);
         startActivity(intent);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(RECYCLER_POS,mLinearLayoutManager.onSaveInstanceState());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        mLinearLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(RECYCLER_POS));
     }
 }

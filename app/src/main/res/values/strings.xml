@@ -13,4 +13,6 @@
     <string name="error_create_post">Error creating post</string>
     <string name="must_be_logged">You must be logged in</string>
     <string name="post">Post</string>
+
+    <string name="transtion">image_for_transition</string>
 </resources>
