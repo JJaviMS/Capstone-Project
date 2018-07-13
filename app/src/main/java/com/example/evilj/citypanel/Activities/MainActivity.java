@@ -1,8 +1,11 @@
 package com.example.evilj.citypanel.Activities;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -54,6 +57,8 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
     private DatabaseReference mRootRef;
     private PostFirebaseRecyclerAdapter mAdapter;
     private LinearLayoutManager mLinearLayoutManager;
+    @Nullable
+    private GPSReciever mGPSReciever;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
         mRootRef = FirebaseDatabase.getInstance().getReference();
         //FirebaseRecyclerViewAdapter
         mCurrentCity = getCurrentCity();
-        if (mCurrentCity==null) showEmptyView();
+        if (mCurrentCity == null) showEmptyView();
         populateRecyclerView();
     }
 
@@ -109,6 +114,7 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
         } else {
             mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             if (mLocationManager != null) {
+                if (!isGpsEnabled()) return null;
                 mLocation = mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
             } else return null;
             double longitude = mLocation.getLongitude();
@@ -130,38 +136,48 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
      * Creates the adapter and set it to the RecyclerView
      */
     private void populateRecyclerView() {
-      SnapshotParser<Post> parser = new SnapshotParser<Post>() {
-            @NonNull
-            @Override
-            public Post parseSnapshot(@NonNull DataSnapshot snapshot) {
-                Post post = snapshot.getValue(Post.class);
-                if (post == null) throw new RuntimeException("Post cant be null");
-                post.setId(snapshot.getKey());
+        if (mGPSReciever != null) {
+            unregisterReceiver(mGPSReciever);
+            mGPSReciever = null;
+        }
+        if (mCurrentCity != null) {
+            SnapshotParser<Post> parser = new SnapshotParser<Post>() {
+                @NonNull
+                @Override
+                public Post parseSnapshot(@NonNull DataSnapshot snapshot) {
+                    Post post = snapshot.getValue(Post.class);
+                    if (post == null) throw new RuntimeException("Post cant be null");
+                    post.setId(snapshot.getKey());
 
 
-                return post;
-            }
-        };
-        DatabaseReference reference = mRootRef.child("post").child(mCurrentCity);
-        FirebaseRecyclerOptions<Post> recyclerOptions =
-                new FirebaseRecyclerOptions.Builder<Post>().setQuery(reference, parser).build();
-        mAdapter = new PostFirebaseRecyclerAdapter(recyclerOptions, this,this);
-        mPostRecyclerView.setAdapter(mAdapter);
-        mLinearLayoutManager = new LinearLayoutManager(this);
-        mPostRecyclerView.setLayoutManager(mLinearLayoutManager);
-        mAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
-            @Override
-            public void onChanged() {
-                super.onChanged();
-                showEmptyView();
-            }
-        });
-        mPostRecyclerView.addItemDecoration(new DividerItemDecoration(this,mLinearLayoutManager.getOrientation()));
-        mAdapter.startListening();
+                    return post;
+                }
+            };
+            DatabaseReference reference = mRootRef.child("post").child(mCurrentCity);
+            FirebaseRecyclerOptions<Post> recyclerOptions =
+                    new FirebaseRecyclerOptions.Builder<Post>().setQuery(reference, parser).build();
+            mAdapter = new PostFirebaseRecyclerAdapter(recyclerOptions, this, this);
+            mPostRecyclerView.setAdapter(mAdapter);
+            mLinearLayoutManager = new LinearLayoutManager(this);
+            mPostRecyclerView.setLayoutManager(mLinearLayoutManager);
+            mAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+                @Override
+                public void onChanged() {
+                    super.onChanged();
+                    showEmptyView();
+                }
+            });
+            mPostRecyclerView.addItemDecoration(new DividerItemDecoration(this, mLinearLayoutManager.getOrientation()));
+            mAdapter.startListening();
+            showEmptyView();
+        } else {
+            mGPSReciever = new GPSReciever();
+            registerReceiver(mGPSReciever, new IntentFilter(LocationManager.PROVIDERS_CHANGED_ACTION));
+        }
     }
 
     private void showEmptyView() {
-        if (mAdapter.getItemCount() == 0) {
+        if (mAdapter == null || mAdapter.getItemCount() == 0) {
             mPostRecyclerView.setVisibility(View.GONE);
             mEmptyLayout.setVisibility(View.VISIBLE);
         } else {
@@ -183,9 +199,9 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
     }
 
     @OnClick(R.id.fab_new_post)
-    void launchNewPostActivity (){
-        Intent intent = new Intent(this,CreatePostActivity.class);
-        intent.putExtra(CreatePostActivity.EXTRA_CITY,mCurrentCity);
+    void launchNewPostActivity() {
+        Intent intent = new Intent(this, CreatePostActivity.class);
+        intent.putExtra(CreatePostActivity.EXTRA_CITY, mCurrentCity);
         startActivity(intent);
     }
 
@@ -196,20 +212,46 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
 
     @Override
     public void onClick(Post post) {
-        Intent intent = new Intent(this,DetailActivity.class);
-        intent.putExtra(DetailActivity.POST_EXTRA,post);
+        Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtra(DetailActivity.POST_EXTRA, post);
         startActivity(intent);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putParcelable(RECYCLER_POS,mLinearLayoutManager.onSaveInstanceState());
+        if (mLinearLayoutManager != null)
+            outState.putParcelable(RECYCLER_POS, mLinearLayoutManager.onSaveInstanceState());
     }
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-        mLinearLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(RECYCLER_POS));
+        if (mLinearLayoutManager != null)
+            mLinearLayoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(RECYCLER_POS));
+    }
+
+    /**
+     * Check if the GPS is enabled
+     *
+     * @return True if GPS is enabled, false otherwise
+     */
+    private boolean isGpsEnabled() {
+        return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+                || mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+    }
+
+    class GPSReciever extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent == null) return;
+            String action = intent.getAction();
+            if (action == null) return;
+            if (action.equals(LocationManager.PROVIDERS_CHANGED_ACTION)) {
+                mCurrentCity = getCurrentCity();
+                populateRecyclerView();
+            }
+        }
     }
 }
