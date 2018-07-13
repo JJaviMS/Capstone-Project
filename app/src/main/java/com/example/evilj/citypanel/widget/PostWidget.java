@@ -8,7 +8,7 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.RemoteViews;
 
-import com.example.evilj.citypanel.Activities.DetailActivity;
+import com.example.evilj.citypanel.activities.DetailActivity;
 import com.example.evilj.citypanel.Models.Post;
 import com.example.evilj.citypanel.R;
 

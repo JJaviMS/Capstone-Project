@@ -16,14 +16,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Activities.MainActivity">
+        <activity android:name=".activities.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.CreatePostActivity" />
+        <activity android:name=".activities.CreatePostActivity"
+            android:parentActivityName=".activities.MainActivity"/>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
@@ -39,7 +40,8 @@
             android:name=".services.CreatePostService"
             android:exported="false" />
 
-        <activity android:name=".Activities.DetailActivity" />
+        <activity android:name=".activities.DetailActivity"
+            android:parentActivityName=".activities.MainActivity"/>
 
         <receiver android:name=".widget.PostWidget">
             <intent-filter>

@@ -1,4 +1,4 @@
-package com.example.evilj.citypanel.Activities;
+package com.example.evilj.citypanel.activities;
 
 import android.Manifest;
 import android.annotation.SuppressLint;

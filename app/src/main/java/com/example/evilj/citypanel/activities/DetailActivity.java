@@ -1,4 +1,4 @@
-package com.example.evilj.citypanel.Activities;
+package com.example.evilj.citypanel.activities;
 
 import android.content.Intent;
 import android.os.Build;
@@ -14,7 +14,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.evilj.citypanel.Models.Post;
 import com.example.evilj.citypanel.R;
