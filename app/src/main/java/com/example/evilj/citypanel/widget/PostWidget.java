@@ -1,11 +1,14 @@
 package com.example.evilj.citypanel.widget;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.widget.RemoteViews;
 
+import com.example.evilj.citypanel.Activities.DetailActivity;
 import com.example.evilj.citypanel.Models.Post;
 import com.example.evilj.citypanel.R;
 
@@ -27,6 +30,10 @@ public class PostWidget extends AppWidgetProvider {
             views.setTextViewText(R.id.widget_post, sPost.getMessage());
             views.setViewVisibility(R.id.widget_name, View.VISIBLE);
             views.setTextViewText(R.id.widget_name, sPost.getCreadorName());
+            Intent intent = new Intent(context, DetailActivity.class);
+            intent.putExtra(DetailActivity.POST_EXTRA,sPost);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context,0,intent,0);
+            views.setOnClickPendingIntent(R.id.widget_root,pendingIntent);
         }
 
         // Instruct the widget manager to update the widget
