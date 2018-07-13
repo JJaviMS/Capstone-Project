@@ -133,10 +133,16 @@ public class CreatePostActivity extends AppCompatActivity {
                         mCurrentUri = null;
                         changePickedImageState();
                     }
+                    break;
 
                 }
                 case CAMERA_INTENT_ID: {
                     changePickedImageState();
+                    break;
+                }
+                case LOG_IN_REQ:{
+                    invalidateOptionsMenu();
+                    break;
                 }
             }
         } else {
@@ -333,6 +339,7 @@ public class CreatePostActivity extends AppCompatActivity {
             case R.id.sign_out_button:{
                 FirebaseAuth.getInstance().signOut();
                 invalidateOptionsMenu();
+                finish();
             }
         }
         return super.onOptionsItemSelected(item);
