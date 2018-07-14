@@ -15,7 +15,7 @@ public class Post implements Parcelable {
     private String creadorUID;
     private String city;
     private String creadorName;
-    private String creadorImageURL;
+    @Nullable private String creadorImageURL;
     private String id;
 
     private Post(Parcel in) {
@@ -76,11 +76,11 @@ public class Post implements Parcelable {
         this.creadorName = creadorName;
     }
 
-    public void setCreadorImageURL(String creadorImageURL) {
+    public void setCreadorImageURL(@Nullable String creadorImageURL) {
         this.creadorImageURL = creadorImageURL;
     }
 
-    public Post(String message, @Nullable String imageURL, String creadorUID, String city, String creadorName, String creadorImageURL) {
+    public Post(String message, @Nullable String imageURL, String creadorUID, String city, String creadorName, @Nullable String creadorImageURL) {
         this.message = message;
         this.imageURL = imageURL;
         this.creadorUID = creadorUID;
@@ -102,6 +102,7 @@ public class Post implements Parcelable {
         return creadorName;
     }
 
+    @Nullable
     public String getCreadorImageURL() {
         return creadorImageURL;
     }

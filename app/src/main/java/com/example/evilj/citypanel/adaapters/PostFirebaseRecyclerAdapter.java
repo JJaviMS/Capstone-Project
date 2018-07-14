@@ -59,8 +59,15 @@ public class PostFirebaseRecyclerAdapter extends FirebaseRecyclerAdapter<Post, P
         }
         holder.mPostAutor.setText(model.getCreadorName());
         holder.mPostMessage.setText(model.getMessage());
-        Glide.with(mContext).load(model.getCreadorImageURL()).apply(RequestOptions.centerCropTransform())
-                .apply(RequestOptions.circleCropTransform()).into(holder.mAutorIv);
+        String userPhoto = model.getCreadorImageURL();
+        if (userPhoto==null){
+            Glide.with(mContext).load(mContext.getDrawable(R.drawable.ic_mood_black_24dp))
+                    .apply(RequestOptions.centerCropTransform()).into(holder.mAutorIv);
+        }else {
+            Glide.with(mContext).load(userPhoto).apply(RequestOptions.centerCropTransform())
+                    .apply(RequestOptions.circleCropTransform()).into(holder.mAutorIv);
+        }
+
     }
 
     @NonNull

@@ -61,7 +61,12 @@ public class DetailActivity extends AppCompatActivity {
             Glide.with(this).load(mPost.getImageURL()).apply(RequestOptions.centerCropTransform()).into(mPostIv);
         }
         mMessageTv.setText(mPost.getMessage());
-        Glide.with(this).load(mPost.getCreadorImageURL()).apply(RequestOptions.circleCropTransform()).into(mPhotoIv);
+        String userPhoto = mPost.getCreadorImageURL();
+        if (userPhoto==null){
+            Glide.with(this).load(getDrawable(R.drawable.ic_mood_black_24dp)).apply(RequestOptions.centerCropTransform()).into(mPhotoIv);
+        }else {
+            Glide.with(this).load(userPhoto).apply(RequestOptions.circleCropTransform()).into(mPhotoIv);
+        }
         mNameTv.setText(mPost.getCreadorName());
     }
     @OnClick(R.id.post_iv)
