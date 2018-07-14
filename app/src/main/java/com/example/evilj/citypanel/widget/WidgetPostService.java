@@ -109,7 +109,8 @@ public class WidgetPostService extends IntentService {
             Location location;
             if (locationManager != null) {
                 if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                        || !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER))
+                        || !locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+                        || !locationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER))
                     return null;
                 location = locationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
             } else return null;

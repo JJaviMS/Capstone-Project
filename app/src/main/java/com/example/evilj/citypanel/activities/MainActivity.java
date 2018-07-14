@@ -1,6 +1,7 @@
 package com.example.evilj.citypanel.activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -120,8 +121,9 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
             mLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             if (mLocationManager != null) {
                 if (!isGpsEnabled()) return null;
-                mLocation = mLocationManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER);
+                mLocation = getLastLocation();
             } else return null;
+            if (mLocation==null) return null;
             double longitude = mLocation.getLongitude();
             double latitude = mLocation.getLatitude();
             Geocoder geocoder = new Geocoder(this, Locale.getDefault());
@@ -249,7 +251,8 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
      */
     private boolean isGpsEnabled() {
         return mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-                || mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                || mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+                || mLocationManager.isProviderEnabled(LocationManager.PASSIVE_PROVIDER);
     }
 
     class GPSReciever extends BroadcastReceiver {
@@ -285,5 +288,19 @@ public class MainActivity extends AppCompatActivity implements PostFirebaseRecyc
             }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    /**
+     * Get the last position of the user, assumes that the app already have permissions
+     * @return The last position of the user
+     */
+    @SuppressLint("MissingPermission")//Assumes that is checked before calling
+    private Location getLastLocation (){
+        List<String> providers = mLocationManager.getProviders(true);
+        Location loc=null;
+        for (int i=0; i<providers.size() && loc==null;i++){
+            loc = mLocationManager.getLastKnownLocation(providers.get(i));
+        }
+        return loc;
     }
 }
