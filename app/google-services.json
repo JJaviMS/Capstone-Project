@@ -23,8 +23,12 @@
           }
         },
         {
-          "client_id": "542870248837-g50498lcvpsmph9fpv9r3e4uf7di3n2u.apps.googleusercontent.com",
-          "client_type": 3
+          "client_id": "542870248837-gh1l76ftcb8i0oibuuslrj3shc32c2vq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.evilj.citypanel",
+            "certificate_hash": "d1da96b459ba2332ba98c53c6406e04b8b122040"
+          }
         },
         {
           "client_id": "542870248837-g50498lcvpsmph9fpv9r3e4uf7di3n2u.apps.googleusercontent.com",
