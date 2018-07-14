@@ -36,7 +36,8 @@
                 android:layout_marginTop="8dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@color/colorPrimary" />
+                app:srcCompat="@color/colorPrimary"
+                android:contentDescription="@string/user_image" />
 
             <TextView
                 android:id="@+id/message_tv"
@@ -62,7 +63,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/message_tv"
-                app:srcCompat="@color/browser_actions_title_color" />
+                app:srcCompat="@color/browser_actions_title_color"
+                android:contentDescription="@string/post_image" />
 
 
         </android.support.constraint.ConstraintLayout>

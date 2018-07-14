@@ -30,7 +30,8 @@
         android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/post_edit_text"
-        app:srcCompat="@drawable/ic_add_to_photos_black_24dp" />
+        app:srcCompat="@drawable/ic_add_to_photos_black_24dp"
+        android:contentDescription="@string/add_image" />
 
     <Button
         android:id="@+id/post_button"
@@ -52,5 +53,6 @@
         app:layout_constraintBottom_toBottomOf="@+id/add_image_iv"
         app:layout_constraintEnd_toStartOf="@+id/add_image_iv"
         app:layout_constraintTop_toTopOf="@+id/add_image_iv"
-        app:srcCompat="@drawable/ic_photo_camera_black_24dp" />
+        app:srcCompat="@drawable/ic_photo_camera_black_24dp"
+        android:contentDescription="@string/take_image" />
 </android.support.constraint.ConstraintLayout>

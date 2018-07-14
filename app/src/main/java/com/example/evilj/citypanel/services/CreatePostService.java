@@ -122,7 +122,7 @@ public class CreatePostService extends IntentService {
         });
         Task<Uri> urlTask = uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
             @Override
-            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) {
                 if (task.isSuccessful()){
                     return imagePostRef.getDownloadUrl();
                 }else{

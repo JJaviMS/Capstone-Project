@@ -24,4 +24,8 @@
     <string name="widget_updating">Widget updating</string>
     <string name="widget_is_updating">City panel widget is updating</string>
     <string name="please_input">Please input a text or select an image</string>
+    <string name="user_image">User image</string>
+    <string name="post_image">Post image</string>
+    <string name="add_image">Add image</string>
+    <string name="take_image">Take image</string>
 </resources>
