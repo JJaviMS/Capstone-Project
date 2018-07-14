@@ -25,8 +25,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.example.evilj.citypanel.services.CreatePostService;
 import com.example.evilj.citypanel.R;
+import com.example.evilj.citypanel.services.CreatePostService;
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -39,7 +39,6 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -84,10 +83,14 @@ public class CreatePostActivity extends AppCompatActivity {
     @OnClick(R.id.post_button)
     void publishPost() {
         String post = mPostEdit.getEditableText().toString().trim();
+        if (post.isEmpty() && mCurrentUri == null) {
+            Toast.makeText(this, R.string.please_input, Toast.LENGTH_SHORT).show();
+            return;
+        }
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) throw new IllegalStateException();
         String userName = user.getDisplayName();
-        String userImg = Objects.requireNonNull(user.getPhotoUrl()).toString();
+        String userImg = user.getPhotoUrl() == null ? null : user.getPhotoUrl().toString();
         String userUid = user.getUid();
         if (mCurrentUri != null) {
             CreatePostService.startActionImage(this, post, userName, userImg, city, userUid, mCurrentUri);
@@ -129,7 +132,7 @@ public class CreatePostActivity extends AppCompatActivity {
                     if (uri != null) {
                         mCurrentUri = uri.toString();
                         changePickedImageState();
-                    }else{
+                    } else {
                         mCurrentUri = null;
                         changePickedImageState();
                     }
@@ -140,7 +143,7 @@ public class CreatePostActivity extends AppCompatActivity {
                     changePickedImageState();
                     break;
                 }
-                case LOG_IN_REQ:{
+                case LOG_IN_REQ: {
                     invalidateOptionsMenu();
                     break;
                 }
@@ -325,18 +328,18 @@ public class CreatePostActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (FirebaseAuth.getInstance().getCurrentUser()!=null){
-            getMenuInflater().inflate(R.menu.sign_out,menu);
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            getMenuInflater().inflate(R.menu.sign_out, menu);
             return true;
-        }else {
+        } else {
             return super.onCreateOptionsMenu(menu);
         }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.sign_out_button:{
+        switch (item.getItemId()) {
+            case R.id.sign_out_button: {
                 FirebaseAuth.getInstance().signOut();
                 invalidateOptionsMenu();
                 finish();
